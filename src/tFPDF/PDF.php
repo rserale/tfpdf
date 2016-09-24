@@ -124,7 +124,7 @@ class PDF
       // Page sizes
       $this->StdPageSizes = array('a3' => array(841.89, 1190.55), 'a4' => array(595.28, 841.89), 'a5' => array(420.94, 595.28),
          'letter' => array(612, 792), 'legal' => array(612, 1008));
-      $size = $this->_getpagesize($size);
+      $size = $this->getPageSize($size);
       $this->DefPageSize = $size;
       $this->CurPageSize = $size;
       // Page orientation
@@ -469,9 +469,9 @@ class PDF
       // Add a TrueType, OpenType or Type1 font
       $family = strtolower($family);
       $style = strtoupper($style);
-      if ($style == 'IB')
+      if ($style === 'IB')
          $style = 'BI';
-      if ($file == '') {
+      if ($file === '') {
          if ($uni) {
             $file = str_replace(' ', '', $family) . strtolower($style) . '.ttf';
          } else {
@@ -486,9 +486,9 @@ class PDF
          if (defined("_SYSTEM_TTFONTS") && file_exists(_SYSTEM_TTFONTS . $file)) {
             $ttffilename = _SYSTEM_TTFONTS . $file;
          } else {
-            $ttffilename = $this->_getfontpath() . 'unifont/' . $file;
+            $ttffilename = $this->getFontPath() . 'unifont/' . $file;
          }
-         $unifilename = $this->_getfontpath() . 'unifont/' . strtolower(substr($file, 0, (strpos($file, '.'))));
+         $unifilename = $this->getFontPath() . 'unifont/' . strtolower(substr($file, 0, (strpos($file, '.'))));
          $name = '';
          $originalsize = 0;
          $ttfstat = stat($ttffilename);
@@ -497,22 +497,24 @@ class PDF
          }
          if (!isset($type) || !isset($name) || $originalsize != $ttfstat['size']) {
             $ttffile = $ttffilename;
-            require_once($this->_getfontpath() . 'unifont/ttfonts.php');
             $ttf = new TTFontFile();
             $ttf->getMetrics($ttffile);
-            $cw = $ttf->charWidths;
-            $name = preg_replace('/[ ()]/', '', $ttf->fullName);
+            $cw = $ttf->getCharWidths();
+            $name = preg_replace('/[ ()]/', '', $ttf->getFullName());
 
-            $desc = array('Ascent' => round($ttf->ascent),
-               'Descent' => round($ttf->descent),
-               'CapHeight' => round($ttf->capHeight),
-               'Flags' => $ttf->flags,
-               'FontBBox' => '[' . round($ttf->bbox[0]) . " " . round($ttf->bbox[1]) . " " . round($ttf->bbox[2]) . " " . round($ttf->bbox[3]) . ']',
-               'ItalicAngle' => $ttf->italicAngle,
-               'StemV' => round($ttf->stemV),
-               'MissingWidth' => round($ttf->defaultWidth));
-            $up = round($ttf->underlinePosition);
-            $ut = round($ttf->underlineThickness);
+            $desc = array(
+               'Ascent' => round($ttf->getAscent()),
+               'Descent' => round($ttf->getDescent()),
+               'CapHeight' => round($ttf->getCapHeight()),
+               'Flags' => $ttf->getFlags(),
+               'FontBBox' => '[' . round($ttf->getBbox()[0]) . ' ' . round($ttf->getBbox()[1]) . ' ' . round($ttf->getBbox()[2]) . ' ' . round($ttf->getBbox()[3]) . ']',
+               'ItalicAngle' => $ttf->getItalicAngle(),
+               'StemV' => round($ttf->getStemV()),
+               'MissingWidth' => round($ttf->getDefaultWidth())
+            );
+
+            $up = round($ttf->getUnderlinePosition());
+            $ut = round($ttf->getUnderlineThickness());
             $originalsize = $ttfstat['size'] + 0;
             $type = 'TTF';
             // Generate metrics .php file
@@ -526,7 +528,7 @@ class PDF
             $s .= '$originalsize=' . $originalsize . ";\n";
             $s .= '$fontkey=\'' . $fontkey . "';\n";
             $s .= "?>";
-            if (is_writable(dirname($this->_getfontpath() . 'unifont/' . 'x'))) {
+            if (is_writable(dirname($this->getFontPath() . 'unifont/' . 'x'))) {
                $fh = fopen($unifilename . '.mtx.php', "w");
                fwrite($fh, $s, strlen($s));
                fclose($fh);
@@ -1118,86 +1120,50 @@ class PDF
       $this->SetX($x);
    }
 
-   function Output($name = '', $dest = '')
+   /**
+    * Output the generated PDF file
+    *
+    * @param string $name
+    * @param string $destinationType
+    * @return string
+    */
+   public function output()
    {
       // Output PDF to some destination
-      if ($this->state < 3)
+      if ($this->state < 3) {
          $this->Close();
-      $dest = strtoupper($dest);
-      if ($dest == '') {
-         if ($name == '') {
-            $name = 'doc.pdf';
-            $dest = 'I';
-         } else
-            $dest = 'F';
       }
-      switch ($dest) {
-         case 'I':
-            // Send to standard output
-            $this->_checkoutput();
-            if (PHP_SAPI != 'cli') {
-               // We send to a browser
-               header('Content-Type: application/pdf');
-               header('Content-Disposition: inline; filename="' . $name . '"');
-               header('Cache-Control: private, max-age=0, must-revalidate');
-               header('Pragma: public');
-            }
-            echo $this->buffer;
-            break;
-         case 'D':
-            // Download file
-            $this->_checkoutput();
-            header('Content-Type: application/x-download');
-            header('Content-Disposition: attachment; filename="' . $name . '"');
-            header('Cache-Control: private, max-age=0, must-revalidate');
-            header('Pragma: public');
-            echo $this->buffer;
-            break;
-         case 'F':
-            // Save to local file
-            $f = fopen($name, 'wb');
-            if (!$f)
-               $this->Error('Unable to create output file: ' . $name);
-            fwrite($f, $this->buffer, strlen($this->buffer));
-            fclose($f);
-            break;
-         case 'S':
-            // Return as a string
-            return $this->buffer;
-         default:
-            $this->Error('Incorrect output destination: ' . $dest);
-      }
-      return '';
+
+      return $this->buffer;
    }
 
-   /*******************************************************************************
-    *                                                                              *
-    *                              Protected methods                               *
-    *                                                                              *
-    *******************************************************************************/
 
-   function _getfontpath()
+
+   protected function getFontPath()
    {
       return $this->fontPath;
    }
 
-   function _checkoutput()
+   protected function checkOutput()
    {
-      if (PHP_SAPI != 'cli') {
-         if (headers_sent($file, $line))
-            $this->Error("Some data has already been output, can't send PDF file (output started at $file:$line)");
+      if (PHP_SAPI !== 'cli') {
+         if (headers_sent($file, $line)) {
+            throw new \RuntimeException("Some data has already been output, can't send PDF file (output started at $file:$line)");
+         }
       }
+
       if (ob_get_length()) {
          // The output buffer is not empty
          if (preg_match('/^(\xEF\xBB\xBF)?\s*$/', ob_get_contents())) {
             // It contains only a UTF-8 BOM and/or whitespace, let's clean it
             ob_clean();
-         } else
-            $this->Error("Some data has already been output, can't send PDF file");
+         } else {
+            throw new \RuntimeException('Some data has already been output, can\'t send PDF file');
+         }
       }
    }
 
-   function _getpagesize($size)
+   private function getPageSize($size)
    {
       if (is_string($size)) {
          $size = strtolower($size);
@@ -1229,7 +1195,7 @@ class PDF
       if ($size == '')
          $size = $this->DefPageSize;
       else
-         $size = $this->_getpagesize($size);
+         $size = $this->getPageSize($size);
       if ($orientation != $this->CurOrientation || $size[0] != $this->CurPageSize[0] || $size[1] != $this->CurPageSize[1]) {
          // New size or orientation
          if ($orientation == 'P') {
@@ -1624,7 +1590,7 @@ class PDF
             $this->_newobj();
             $this->FontFiles[$file]['n'] = $this->n;
             $font = '';
-            $f = fopen($this->_getfontpath() . $file, 'rb', 1);
+            $f = fopen($this->getFontPath() . $file, 'rb', 1);
             if (!$f)
                $this->Error('Font file not found');
             while (!feof($f))
@@ -1706,9 +1672,9 @@ class PDF
             $this->_out($s . '>>');
             $this->_out('endobj');
          } // TrueType embedded SUBSETS or FULL
-         else if ($type == 'TTF') {
+         else if ($type === 'TTF') {
             $this->fonts[$k]['n'] = $this->n + 1;
-            require_once($this->_getfontpath() . 'unifont/ttfonts.php');
+
             $ttf = new TTFontFile();
             $fontname = 'MPDFAA' . '+' . $font['name'];
             $subset = $font['subset'];
@@ -1716,7 +1682,7 @@ class PDF
             $ttfontstream = $ttf->makeSubset($font['ttffile'], $subset);
             $ttfontsize = strlen($ttfontstream);
             $fontstream = gzcompress($ttfontstream);
-            $codeToGlyph = $ttf->codeToGlyph;
+            $codeToGlyph = $ttf->getCodeToGlyph();
             unset($codeToGlyph[0]);
 
             // Type0 Font
@@ -1743,7 +1709,7 @@ class PDF
                $this->_out('/DW ' . $font['desc']['MissingWidth'] . '');
             }
 
-            $this->_putTTfontwidths($font, $ttf->maxUni);
+            $this->_putTTfontwidths($font, $ttf->getMaxUni());
 
             $this->_out('/CIDToGIDMap ' . ($this->n + 4) . ' 0 R');
             $this->_out('>>');
@@ -1852,7 +1818,7 @@ class PDF
       // for each character
       for ($cid = $startcid; $cid < $cwlen; $cid++) {
          if ($cid == 128 && (!file_exists($font['unifilename'] . '.cw127.php'))) {
-            if (is_writable(dirname($this->_getfontpath() . 'unifont/x'))) {
+            if (is_writable(dirname($this->getFontPath() . 'unifont/x'))) {
                $fh = fopen($font['unifilename'] . '.cw127.php', "wb");
                $cw127 = '<?php' . "\n";
                $cw127 .= '$rangeid=' . $rangeid . ";\n";
@@ -2044,7 +2010,7 @@ class PDF
 
    function _putinfo()
    {
-      $this->_out('/Producer ' . $this->_textstring('tFPDF ' . tFPDF_VERSION));
+      $this->_out('/Producer ' . $this->_textstring('tFPDF ' . $this->PDFVersion));
       if (!empty($this->title))
          $this->_out('/Title ' . $this->_textstring($this->title));
       if (!empty($this->subject))
