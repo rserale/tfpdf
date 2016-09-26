@@ -1,11 +1,15 @@
 {
-    "name": "dblencowe/tFPDF",
+    "name": "docnet/tFPDF",
     "description": "tFPDF",
     "keywords": ["pdf"],
     "homepage": "http://github.com/dblencowe/tfpdf",
     "type": "library",
     "license": "LGPL",
     "authors": [
+        {
+          "name": "David Wilcock",
+          "email": "dwilcock@doc-net.com"
+        },
         {
             "name": "Dave Blencowe",
             "email": "dblencowe@gmail.com"
@@ -22,7 +26,7 @@
         "test": "phpunit"
     },
     "require": {
-        "php": ">= 5.6",
+        "php": ">= 5.5",
         "ext-mbstring": "*"
     },
     "require-dev": {
