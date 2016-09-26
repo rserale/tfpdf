@@ -869,6 +869,7 @@ class PDF
             return;
         }
 
+
         if ($bol_unicode) {
             if (defined("_SYSTEM_TTFONTS") && file_exists(_SYSTEM_TTFONTS . $str_file)) {
                 $str_ttf_filename = _SYSTEM_TTFONTS . $str_file;
