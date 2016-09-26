@@ -4,11 +4,11 @@ namespace tFPDF;
 
 class TTFontFile
 {
-   private $gfWords = (1 << 0);
-   private $gfScale = (1 << 3);
-   private $gfMore = (1 << 5);
-   private $gfXYScale = (1 << 6);
-   private $gfTwoByTwo = (1 << 7);
+   private $gfWords = 0b1;
+   private $gfScale = 0b1000;
+   private $gfMore = 0b100000;
+   private $gfXYScale = 0b1000000;
+   private $gfTwoByTwo = 0b10000000;
 
    // Define the value used in the "head" table of a created TTF file
    // 0x74727565 "true" for Mac
