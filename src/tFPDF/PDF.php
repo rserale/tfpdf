@@ -266,10 +266,10 @@ class PDF
       $this->AliasNbPages = $alias;
    }
 
-   function Error($msg)
+   private function Error($msg)
    {
       // Fatal error
-      die('<b>FPDF error:</b> ' . $msg);
+      throw new \RuntimeException('FPDF Error: ' . $msg);
    }
 
    function Open()
