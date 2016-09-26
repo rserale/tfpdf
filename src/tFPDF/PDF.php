@@ -5,63 +5,63 @@ namespace tFPDF;
 class PDF
 {
 
-   private $unifontSubset;
-   private $page;               // current page number
-   private $n;                  // current object number
-   private $offsets;            // array of object offsets
-   private $buffer;             // buffer holding in-memory PDF
-   private $pages;              // array containing pages
-   private $state;              // current document state
-   private $compress;           // compression flag
-   private $k;                  // scale factor (number of points in user unit)
-   private $DefOrientation;     // default orientation
-   private $CurOrientation;     // current orientation
-   private $StdPageSizes;       // standard page sizes
-   private $DefPageSize;        // default page size
-   private $CurPageSize;        // current page size
-   private $PageSizes;          // used for pages with non default sizes or orientations
-   private $wPt, $hPt;          // dimensions of current page in points
-   private $w, $h;              // dimensions of current page in user unit
-   private $lMargin;            // left margin
-   private $tMargin;            // top margin
-   private $rMargin;            // right margin
-   private $bMargin;            // page break margin
-   private $cMargin;            // cell margin
-   private $x, $y;              // current position in user unit
-   private $lasth;              // height of last printed cell
-   private $LineWidth;          // line width in user unit
-   private $fontPath;           // path containing fonts
-   private $coreFonts;          // array of core font names
-   private $fonts;              // array of used fonts
-   private $FontFiles;          // array of font files
-   private $diffs;              // array of encoding differences
-   private $FontFamily;         // current font family
-   private $FontStyle;          // current font style
-   private $underline;          // underlining flag
-   private $CurrentFont;        // current font info
-   private $FontSizePt;         // current font size in points
-   private $FontSize;           // current font size in user unit
-   private $DrawColor;          // commands for drawing color
-   private $FillColor;          // commands for filling color
-   private $TextColor;          // commands for text color
-   private $ColorFlag;          // indicates whether fill and text colors are different
-   private $ws;                 // word spacing
-   private $images;             // array of used images
-   private $PageLinks;          // array of links in pages
-   private $links;              // array of internal links
-   private $AutoPageBreak;      // automatic page breaking
-   private $PageBreakTrigger;   // threshold used to trigger page breaks
-   private $InHeader;           // flag set when processing header
-   private $InFooter;           // flag set when processing footer
-   private $ZoomMode;           // zoom display mode
-   private $LayoutMode;         // layout display mode
-   private $title;              // title
-   private $subject;            // subject
-   private $author;             // author
-   private $keywords;           // keywords
-   private $creator;            // creator
-   private $AliasNbPages;       // alias for total number of pages
-   private $PDFVersion;         // PDF version number
+   protected $unifontSubset;
+   protected $page;               // current page number
+   protected $n;                  // current object number
+   protected $offsets;            // array of object offsets
+   protected $buffer;             // buffer holding in-memory PDF
+   protected $pages;              // array containing pages
+   protected $state;              // current document state
+   protected $compress;           // compression flag
+   protected $k;                  // scale factor (number of points in user unit)
+   protected $DefOrientation;     // default orientation
+   protected $CurOrientation;     // current orientation
+   protected $StdPageSizes;       // standard page sizes
+   protected $DefPageSize;        // default page size
+   protected $CurPageSize;        // current page size
+   protected $PageSizes;          // used for pages with non default sizes or orientations
+   protected $wPt, $hPt;          // dimensions of current page in points
+   protected $w, $h;              // dimensions of current page in user unit
+   protected $lMargin;            // left margin
+   protected $tMargin;            // top margin
+   protected $rMargin;            // right margin
+   protected $bMargin;            // page break margin
+   protected $cMargin;            // cell margin
+   protected $x, $y;              // current position in user unit
+   protected $lasth;              // height of last printed cell
+   protected $LineWidth;          // line width in user unit
+   protected $fontPath;           // path containing fonts
+   protected $coreFonts;          // array of core font names
+   protected $fonts;              // array of used fonts
+   protected $FontFiles;          // array of font files
+   protected $diffs;              // array of encoding differences
+   protected $FontFamily;         // current font family
+   protected $FontStyle;          // current font style
+   protected $underline;          // underlining flag
+   protected $CurrentFont;        // current font info
+   protected $FontSizePt;         // current font size in points
+   protected $FontSize;           // current font size in user unit
+   protected $DrawColor;          // commands for drawing color
+   protected $FillColor;          // commands for filling color
+   protected $TextColor;          // commands for text color
+   protected $ColorFlag;          // indicates whether fill and text colors are different
+   protected $ws;                 // word spacing
+   protected $images;             // array of used images
+   protected $PageLinks;          // array of links in pages
+   protected $links;              // array of internal links
+   protected $AutoPageBreak;      // automatic page breaking
+   protected $PageBreakTrigger;   // threshold used to trigger page breaks
+   protected $InHeader;           // flag set when processing header
+   protected $InFooter;           // flag set when processing footer
+   protected $ZoomMode;           // zoom display mode
+   protected $LayoutMode;         // layout display mode
+   protected $title;              // title
+   protected $subject;            // subject
+   protected $author;             // author
+   protected $keywords;           // keywords
+   protected $creator;            // creator
+   protected $AliasNbPages;       // alias for total number of pages
+   protected $PDFVersion;         // PDF version number
 
 
    public function __construct($orientation = 'P', $unit = 'mm', $size = 'A4')
