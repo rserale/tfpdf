@@ -42,269 +42,375 @@ class PDF
     protected $arr_offsets = [];
 
     /**
+     * Buffer holding in-memory PDF
+     *
      * @var string
      */
-    protected $str_buffer = '';             // buffer holding in-memory PDF
+    protected $str_buffer = '';
 
     /**
+     * Array containing pages
+     *
      * @var array
      */
-    protected $arr_pages = [];              // array containing pages
+    protected $arr_pages = [];
 
     /**
+     * Current document state
+     *
      * @var int
      */
-    protected $int_state = self::DOCUMENT_STATE_NOT_INITIALIZED;              // current document state
+    protected $int_state = self::DOCUMENT_STATE_NOT_INITIALIZED;
 
     /**
+     * Compression flag
+     *
      * @var bool
      */
-    protected $bol_compress = false;           // compression flag
+    protected $bol_compress = false;
 
     /**
+     * Scale factor (number of points in user unit)
+     *
      * @var int
      */
-    protected $flt_scale_factor = 1;                  // scale factor (number of points in user unit)
+    protected $flt_scale_factor = 1;
 
     /**
+     * Default orientation
+     *
      * @var string
      */
-    protected $str_default_orientation = '';     // default orientation
+    protected $str_default_orientation = '';
 
     /**
+     * Current orientation
+     *
      * @var string
      */
-    protected $str_current_orientation = '';     // current orientation
+    protected $str_current_orientation = '';
 
     /**
+     * Standard page sizes
+     *
      * @var array
      */
-    protected $arr_standard_page_sizes = [];       // standard page sizes
+    protected $arr_standard_page_sizes = [];
 
     /**
+     * Default page size
+     *
      * @var array|string
      */
-    protected $arr_default_page_sizes = [];        // default page size
+    protected $arr_default_page_sizes = [];
 
     /**
+     * Current page size
+     *
      * @var array|string
      */
-    protected $arr_current_page_sizes = [];        // current page size
+    protected $arr_current_page_sizes = [];
 
     /**
+     * Used for pages with non default sizes or orientations
+     *
      * @var array
      */
-    protected $arr_page_sizes = [];          // used for pages with non default sizes or orientations
+    protected $arr_page_sizes = [];
 
     /**
+     * Dimensions of current page in points
+     *
      * @var mixed
      */
-    protected $flt_width_points, $flt_height_points = 0.00;          // dimensions of current page in points
+    protected $flt_width_points, $flt_height_points = 0.00;
 
     /**
+     * Dimensions of current page in user units
+     *
      * @var mixed
      */
-    protected $flt_current_width, $flt_current_height = 0.00;              // dimensions of current page in user unit
+    protected $flt_current_width, $flt_current_height = 0.00;
 
     /**
+     * Left Margin
+     *
      * @var int
      */
-    protected $int_left_margin = 0;            // left margin
+    protected $int_left_margin = 0;
 
     /**
+     * Top Margin
+     *
      * @var int
      */
-    protected $int_top_margin = 0;            // top margin
+    protected $int_top_margin = 0;
 
     /**
+     * Right Margin
+     *
      * @var int
      */
-    protected $int_right_margin = 0;            // right margin
+    protected $int_right_margin = 0;
 
     /**
+     * Page break margin
+     *
      * @var int
      */
-    protected $int_break_margin = 0;            // page break margin
+    protected $int_break_margin = 0;
 
     /**
+     * Cell Margin
+     *
      * @var float|int
      */
-    protected $int_cell_margin = 0;            // cell margin
+    protected $int_cell_margin = 0;
 
     /**
+     * Current position in user unit
+     *
      * @var
      */
-    protected $flt_position_x, $flt_position_y = 0.00;              // current position in user unit
+    protected $flt_position_x, $flt_position_y = 0.00;
 
     /**
+     * Height of last printed cell
+     *
      * @var float
      */
-    protected $flt_last_cell_height = 0.00;              // height of last printed cell
+    protected $flt_last_cell_height = 0.00;
 
     /**
+     * Line width in user units
+     *
      * @var float
      */
-    protected $flt_line_width = 0.00;          // line width in user unit
+    protected $flt_line_width = 0.00;
 
     /**
+     * The path containing fonts
+     *
      * @var string
      */
-    protected $str_font_path = '';           // path containing fonts
+    protected $str_font_path = '';
 
     /**
+     * Array of core font names
+     *
      * @var array
      */
-    protected $arr_core_fonts = [];          // array of core font names
+    protected $arr_core_fonts = [];
 
     /**
+     * Array of used fonts
+     *
      * @var array
      */
-    protected $arr_fonts = [];              // array of used fonts
+    protected $arr_fonts = [];
 
     /**
+     * Array of font files
+     *
      * @var array
      */
-    protected $arr_font_files = [];          // array of font files
+    protected $arr_font_files = [];
 
     /**
+     * Array of encoding differences
+     *
      * @var array
      */
-    protected $arr_encoding_diffs = [];              // array of encoding differences
+    protected $arr_encoding_diffs = [];
 
     /**
+     * Current font family
+     *
      * @var string
      */
-    protected $str_current_font_family = '';         // current font family
+    protected $str_current_font_family = '';
 
     /**
+     * Current font style
+     *
      * @var string
      */
-    protected $str_current_font_style = '';          // current font style
+    protected $str_current_font_style = '';
 
     /**
+     * Underline flag
+     *
      * @var bool
      */
-    protected $bol_underline = false;          // underlining flag
+    protected $bol_underline = false;
 
     /**
+     * Array of current font info
+     *
      * @var array
      */
-    protected $arr_current_font_info = [];        // current font info
+    protected $arr_current_font_info = [];
 
     /**
+     * Current font size in points
+     *
      * @var int
      */
-    protected $int_current_font_size = 12;         // current font size in points
+    protected $int_current_font_size = 12;
 
     /**
+     * Current font size in user units
+     *
      * @var int
      */
-    protected $int_font_size_user = 0;           // current font size in user unit
+    protected $int_font_size_user = 0;
 
     /**
+     * The draw color
+     *
      * @var string
      */
-    protected $str_draw_color = '0 G';          // commands for drawing color
+    protected $str_draw_color = '0 G';
 
     /**
+     * The fill color
+     *
      * @var string
      */
-    protected $str_fill_color = '0 g';          // commands for filling color
+    protected $str_fill_color = '0 g';
 
     /**
+     * The text color
+     *
      * @var string
      */
-    protected $str_text_color = '0 g';          // commands for text color
+    protected $str_text_color = '0 g';
 
     /**
+     * Indicates whether fill and text colors are different
+     *
      * @var bool
      */
-    protected $bol_fill_text_differ = false;          // indicates whether fill and text colors are different
+    protected $bol_fill_text_differ = false;
 
     /**
+     * The word spacing
+     *
      * @var int
      */
-    protected $int_word_spacing = 0;                 // word spacing
+    protected $int_word_spacing = 0;
 
     /**
+     * Array of used images
+     *
      * @var array
      */
-    protected $arr_images = [];             // array of used images
+    protected $arr_images = [];
 
     /**
+     * Array of links in pages
+     *
      * @var array
      */
-    protected $arr_page_links = [];          // array of links in pages
+    protected $arr_page_links = [];
 
     /**
+     * Array of internal links
+     *
      * @var array
      */
-    protected $arr_internal_links = [];              // array of internal links
+    protected $arr_internal_links = [];
 
     /**
+     * Automatic page breaking
+     *
      * @var bool
      */
-    protected $bol_auto_page_break = false;      // automatic page breaking
+    protected $bol_auto_page_break = false;
 
     /**
+     * Threshold used to trigger page breaks
+     *
      * @var float
      */
-    protected $flt_page_break_trigger = 0.00;   // threshold used to trigger page breaks
+    protected $flt_page_break_trigger = 0.00;
 
     /**
+     * Flag set when processing header
+     *
      * @var bool
      */
-    protected $bol_in_header = false;           // flag set when processing header
+    protected $bol_in_header = false;
 
     /**
+     * Flag set when processing footer
+     *
      * @var bool
      */
-    protected $bol_in_footer = false;           // flag set when processing footer
+    protected $bol_in_footer = false;
 
     /**
-     * @var
+     * Zoom display mode
+     *
+     * @var mixed
      */
-    protected $mix_zoom_mode;           // zoom display mode
+    protected $mix_zoom_mode;
 
     /**
+     * Layout display mode
+     *
      * @var string
      */
-    protected $str_layout_mode = '';         // layout display mode
+    protected $str_layout_mode = '';
 
     /**
+     * The title
+     *
      * @var string
      */
-    protected $str_title = '';              // title
+    protected $str_title = '';
 
     /**
+     * The subject
+     *
      * @var string
      */
-    protected $str_subject = '';            // subject
+    protected $str_subject = '';
 
     /**
+     * The author
+     *
      * @var string
      */
-    protected $str_author = '';             // author
+    protected $str_author = '';
 
     /**
+     * The keywords
+     *
      * @var string
      */
-    protected $str_keywords = '';           // keywords
+    protected $str_keywords = '';
 
     /**
+     * The creator
+     *
      * @var string
      */
-    protected $str_creator = '';            // creator
+    protected $str_creator = '';
 
     /**
+     * The alias for total number of pages
+     *
      * @var string
      */
-    protected $str_alias_number_pages = '';       // alias for total number of pages
+    protected $str_alias_number_pages = '';
 
     /**
+     * The PDF version number
+     *
      * @var string
      */
-    protected $str_pdf_version = '1.3';         // PDF version number
+    protected $str_pdf_version = '1.3';
 
     /**
      * PDF constructor.
@@ -600,7 +706,7 @@ class PDF
         // Close page
         $this->EndPage();
         // Close document
-        $this->_enddoc();
+        $this->EndDoc();
     }
 
     /**
@@ -2411,7 +2517,7 @@ class PDF
                         $this->Out('/DW ' . $arr_font_data['desc']['MissingWidth'] . '');
                     }
 
-                    $this->_putTTfontwidths($arr_font_data, $obj_ttf->getMaxUni());
+                    $this->PutTTFontWidths($arr_font_data, $obj_ttf->getMaxUni());
 
                     $this->Out('/CIDToGIDMap ' . ($this->int_current_object + 4) . ' 0 R');
                     $this->Out('>>');
@@ -2503,116 +2609,120 @@ class PDF
         }
     }
 
-    function _putTTfontwidths(&$font, $maxUni)
+    /**
+     * @param $arr_font_data
+     * @param $maxUni
+     */
+    private function PutTTFontWidths(&$arr_font_data, $maxUni)
     {
-        if (file_exists($font['unifilename'] . '.cw127.php')) {
-            include($font['unifilename'] . '.cw127.php');
-            $startcid = 128;
+        if (file_exists($arr_font_data['unifilename'] . '.cw127.php')) {
+            include($arr_font_data['unifilename'] . '.cw127.php');
+            $int_start_character_id = 128;
         } else {
-            $rangeid = 0;
-            $range = array();
-            $prevcid = -2;
-            $prevwidth = -1;
-            $interval = false;
-            $startcid = 1;
+            $int_range_id = 0;
+            $arr_range = array();
+            $int_previous_character_id = -2;
+            $int_previous_width = -1;
+            $bol_interval = false;
+            $int_start_character_id = 1;
         }
-        $cwlen = $maxUni + 1;
+        $int_character_width = $maxUni + 1;
 
         // for each character
-        for ($cid = $startcid; $cid < $cwlen; $cid++) {
-            if ($cid == 128 && (!file_exists($font['unifilename'] . '.cw127.php'))) {
+        for ($int_character_id = $int_start_character_id; $int_character_id < $int_character_width; $int_character_id++) {
+            if ($int_character_id == 128 && (!file_exists($arr_font_data['unifilename'] . '.cw127.php'))) {
                 if (is_writable(dirname($this->getFontPath() . 'unifont/x'))) {
-                    $fh = fopen($font['unifilename'] . '.cw127.php', "wb");
-                    $cw127 = '<?php' . "\n";
-                    $cw127 .= '$rangeid=' . $rangeid . ";\n";
-                    $cw127 .= '$prevcid=' . $prevcid . ";\n";
-                    $cw127 .= '$prevwidth=' . $prevwidth . ";\n";
-                    if ($interval) {
-                        $cw127 .= '$interval=true' . ";\n";
+                    $ptr_file = fopen($arr_font_data['unifilename'] . '.cw127.php', "wb");
+                    $str_data = '<?php' . "\n";
+                    $str_data .= '$rangeid=' . $int_range_id . ";\n";
+                    $str_data .= '$prevcid=' . $int_previous_character_id . ";\n";
+                    $str_data .= '$prevwidth=' . $int_previous_width . ";\n";
+                    if ($bol_interval) {
+                        $str_data .= '$interval=true' . ";\n";
                     } else {
-                        $cw127 .= '$interval=false' . ";\n";
+                        $str_data .= '$interval=false' . ";\n";
                     }
-                    $cw127 .= '$range=' . var_export($range, true) . ";\n";
-                    $cw127 .= "?>";
-                    fwrite($fh, $cw127, strlen($cw127));
-                    fclose($fh);
+                    $str_data .= '$range=' . var_export($arr_range, true) . ";\n";
+                    $str_data .= "?>";
+                    fwrite($ptr_file, $str_data, strlen($str_data));
+                    fclose($ptr_file);
                 }
             }
-            if ($font['cw'][$cid * 2] == "\00" && $font['cw'][$cid * 2 + 1] == "\00") {
+            if ($arr_font_data['cw'][$int_character_id * 2] == "\00" && $arr_font_data['cw'][$int_character_id * 2 + 1] == "\00") {
                 continue;
             }
-            $width = (ord($font['cw'][$cid * 2]) << 8) + ord($font['cw'][$cid * 2 + 1]);
-            if ($width == 65535) {
-                $width = 0;
+            $int_width = (ord($arr_font_data['cw'][$int_character_id * 2]) << 8) + ord($arr_font_data['cw'][$int_character_id * 2 + 1]);
+            if ($int_width == 65535) {
+                $int_width = 0;
             }
-            if ($cid > 255 && (!isset($font['subset'][$cid]) || !$font['subset'][$cid])) {
+            if ($int_character_id > 255 && (!isset($arr_font_data['subset'][$int_character_id]) || !$arr_font_data['subset'][$int_character_id])) {
                 continue;
             }
-            if (!isset($font['dw']) || (isset($font['dw']) && $width != $font['dw'])) {
-                if ($cid == ($prevcid + 1)) {
-                    if ($width == $prevwidth) {
-                        if ($width == $range[$rangeid][0]) {
-                            $range[$rangeid][] = $width;
+            if (!isset($arr_font_data['dw']) || (isset($arr_font_data['dw']) && $int_width != $arr_font_data['dw'])) {
+                if ($int_character_id == ($int_previous_character_id + 1)) {
+                    if ($int_width == $int_previous_width) {
+                        if ($int_width == $arr_range[$int_range_id][0]) {
+                            $arr_range[$int_range_id][] = $int_width;
                         } else {
-                            array_pop($range[$rangeid]);
+                            array_pop($arr_range[$int_range_id]);
                             // new range
-                            $rangeid = $prevcid;
-                            $range[$rangeid] = array();
-                            $range[$rangeid][] = $prevwidth;
-                            $range[$rangeid][] = $width;
+                            $int_range_id = $int_previous_character_id;
+                            $arr_range[$int_range_id] = array();
+                            $arr_range[$int_range_id][] = $int_previous_width;
+                            $arr_range[$int_range_id][] = $int_width;
                         }
-                        $interval = true;
-                        $range[$rangeid]['interval'] = true;
+                        $bol_interval = true;
+                        $arr_range[$int_range_id]['interval'] = true;
                     } else {
-                        if ($interval) {
+                        if ($bol_interval) {
                             // new range
-                            $rangeid = $cid;
-                            $range[$rangeid] = array();
-                            $range[$rangeid][] = $width;
+                            $int_range_id = $int_character_id;
+                            $arr_range[$int_range_id] = array();
+                            $arr_range[$int_range_id][] = $int_width;
                         } else {
-                            $range[$rangeid][] = $width;
+                            $arr_range[$int_range_id][] = $int_width;
                         }
-                        $interval = false;
+                        $bol_interval = false;
                     }
                 } else {
-                    $rangeid = $cid;
-                    $range[$rangeid] = array();
-                    $range[$rangeid][] = $width;
-                    $interval = false;
+                    $int_range_id = $int_character_id;
+                    $arr_range[$int_range_id] = array();
+                    $arr_range[$int_range_id][] = $int_width;
+                    $bol_interval = false;
                 }
-                $prevcid = $cid;
-                $prevwidth = $width;
+                $int_previous_character_id = $int_character_id;
+                $int_previous_width = $int_width;
             }
         }
-        $prevk = -1;
-        $nextk = -1;
-        $prevint = false;
-        foreach ($range as $k => $ws) {
+        $int_previous_key = -1;
+        $int_next_key = -1;
+        $bol_previous_interval = false;
+        foreach ($arr_range as $k => $ws) {
             $cws = count($ws);
-            if (($k == $nextk) AND (!$prevint) AND ((!isset($ws['interval'])) OR ($cws < 4))) {
-                if (isset($range[$k]['interval'])) {
-                    unset($range[$k]['interval']);
+            if (($k == $int_next_key) AND (!$bol_previous_interval) AND ((!isset($ws['interval'])) OR ($cws < 4))) {
+                if (isset($arr_range[$k]['interval'])) {
+                    unset($arr_range[$k]['interval']);
                 }
-                $range[$prevk] = array_merge($range[$prevk], $range[$k]);
-                unset($range[$k]);
+                $arr_range[$int_previous_key] = array_merge($arr_range[$int_previous_key], $arr_range[$k]);
+                unset($arr_range[$k]);
             } else {
-                $prevk = $k;
+                $int_previous_key = $k;
             }
-            $nextk = $k + $cws;
+            $int_next_key = $k + $cws;
             if (isset($ws['interval'])) {
                 if ($cws > 3) {
-                    $prevint = true;
+                    $bol_previous_interval = true;
                 } else {
-                    $prevint = false;
+                    $bol_previous_interval = false;
                 }
-                unset($range[$k]['interval']);
-                --$nextk;
+                unset($arr_range[$k]['interval']);
+                --$int_next_key;
             } else {
-                $prevint = false;
+                $bol_previous_interval = false;
             }
         }
         $w = '';
-        foreach ($range as $k => $ws) {
+        foreach ($arr_range as $k => $ws) {
             if (count(array_count_values($ws)) == 1) {
                 $w .= ' ' . $k . ' ' . ($k + count($ws) - 1) . ' ' . $ws[0];
             } else {
@@ -2622,110 +2732,128 @@ class PDF
         $this->Out('/W [' . $w . ' ]');
     }
 
-    function _putimages()
+    /**
+     *
+     */
+    private function PutImages()
     {
-        foreach (array_keys($this->arr_images) as $file) {
-            $this->_putimage($this->arr_images[$file]);
-            unset($this->arr_images[$file]['data']);
-            unset($this->arr_images[$file]['smask']);
+        foreach (array_keys($this->arr_images) as $str_file) {
+            $this->PutImage($this->arr_images[$str_file]);
+            unset($this->arr_images[$str_file]['data']);
+            unset($this->arr_images[$str_file]['smask']);
         }
     }
 
-    function _putimage(&$info)
+    /**
+     * @param $arr_info
+     */
+    function PutImage(&$arr_info)
     {
         $this->NewObject();
-        $info['n'] = $this->int_current_object;
+        $arr_info['n'] = $this->int_current_object;
         $this->Out('<</Type /XObject');
         $this->Out('/Subtype /Image');
-        $this->Out('/Width ' . $info['w']);
-        $this->Out('/Height ' . $info['h']);
-        if ($info['cs'] == 'Indexed') {
-            $this->Out('/ColorSpace [/Indexed /DeviceRGB ' . (strlen($info['pal']) / 3 - 1) . ' ' . ($this->int_current_object + 1) . ' 0 R]');
+        $this->Out('/Width ' . $arr_info['w']);
+        $this->Out('/Height ' . $arr_info['h']);
+        if ($arr_info['cs'] == 'Indexed') {
+            $this->Out('/ColorSpace [/Indexed /DeviceRGB ' . (strlen($arr_info['pal']) / 3 - 1) . ' ' . ($this->int_current_object + 1) . ' 0 R]');
         } else {
-            $this->Out('/ColorSpace /' . $info['cs']);
-            if ($info['cs'] == 'DeviceCMYK') {
+            $this->Out('/ColorSpace /' . $arr_info['cs']);
+            if ($arr_info['cs'] == 'DeviceCMYK') {
                 $this->Out('/Decode [1 0 1 0 1 0 1 0]');
             }
         }
-        $this->Out('/BitsPerComponent ' . $info['bpc']);
-        if (isset($info['f'])) {
-            $this->Out('/Filter /' . $info['f']);
+        $this->Out('/BitsPerComponent ' . $arr_info['bpc']);
+        if (isset($arr_info['f'])) {
+            $this->Out('/Filter /' . $arr_info['f']);
         }
-        if (isset($info['dp'])) {
-            $this->Out('/DecodeParms <<' . $info['dp'] . '>>');
+        if (isset($arr_info['dp'])) {
+            $this->Out('/DecodeParms <<' . $arr_info['dp'] . '>>');
         }
-        if (isset($info['trns']) && is_array($info['trns'])) {
+        if (isset($arr_info['trns']) && is_array($arr_info['trns'])) {
             $trns = '';
-            for ($i = 0; $i < count($info['trns']); $i++) {
-                $trns .= $info['trns'][$i] . ' ' . $info['trns'][$i] . ' ';
+            for ($i = 0; $i < count($arr_info['trns']); $i++) {
+                $trns .= $arr_info['trns'][$i] . ' ' . $arr_info['trns'][$i] . ' ';
             }
             $this->Out('/Mask [' . $trns . ']');
         }
-        if (isset($info['smask'])) {
+        if (isset($arr_info['smask'])) {
             $this->Out('/SMask ' . ($this->int_current_object + 1) . ' 0 R');
         }
-        $this->Out('/Length ' . strlen($info['data']) . '>>');
-        $this->PutStream($info['data']);
+        $this->Out('/Length ' . strlen($arr_info['data']) . '>>');
+        $this->PutStream($arr_info['data']);
         $this->Out('endobj');
         // Soft mask
-        if (isset($info['smask'])) {
-            $dp = '/Predictor 15 /Colors 1 /BitsPerComponent 8 /Columns ' . $info['w'];
-            $smask = array(
-                'w' => $info['w'],
-                'h' => $info['h'],
+        if (isset($arr_info['smask'])) {
+            $str_dp = '/Predictor 15 /Colors 1 /BitsPerComponent 8 /Columns ' . $arr_info['w'];
+            $arr_smask = array(
+                'w' => $arr_info['w'],
+                'h' => $arr_info['h'],
                 'cs' => 'DeviceGray',
                 'bpc' => 8,
-                'f' => $info['f'],
-                'dp' => $dp,
-                'data' => $info['smask']
+                'f' => $arr_info['f'],
+                'dp' => $str_dp,
+                'data' => $arr_info['smask']
             );
-            $this->_putimage($smask);
+            $this->PutImage($arr_smask);
         }
         // Palette
-        if ($info['cs'] == 'Indexed') {
-            $filter = ($this->bol_compress) ? '/Filter /FlateDecode ' : '';
-            $pal = ($this->bol_compress) ? gzcompress($info['pal']) : $info['pal'];
+        if ($arr_info['cs'] == 'Indexed') {
+            $str_filter = ($this->bol_compress) ? '/Filter /FlateDecode ' : '';
+            $str_pal = ($this->bol_compress) ? gzcompress($arr_info['pal']) : $arr_info['pal'];
             $this->NewObject();
-            $this->Out('<<' . $filter . '/Length ' . strlen($pal) . '>>');
-            $this->PutStream($pal);
+            $this->Out('<<' . $str_filter . '/Length ' . strlen($str_pal) . '>>');
+            $this->PutStream($str_pal);
             $this->Out('endobj');
         }
     }
 
-    function _putxobjectdict()
+    /**
+     *
+     */
+    function PutXObjectDict()
     {
-        foreach ($this->arr_images as $image) {
-            $this->Out('/I' . $image['i'] . ' ' . $image['n'] . ' 0 R');
+        foreach ($this->arr_images as $arr_image) {
+            $this->Out('/I' . $arr_image['i'] . ' ' . $arr_image['n'] . ' 0 R');
         }
     }
 
-    function _putresourcedict()
+    /**
+     *
+     */
+    function PutResourceDict()
     {
         $this->Out('/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
         $this->Out('/Font <<');
-        foreach ($this->arr_fonts as $font) {
-            $this->Out('/F' . $font['i'] . ' ' . $font['n'] . ' 0 R');
+        foreach ($this->arr_fonts as $arr_font) {
+            $this->Out('/F' . $arr_font['i'] . ' ' . $arr_font['n'] . ' 0 R');
         }
         $this->Out('>>');
         $this->Out('/XObject <<');
-        $this->_putxobjectdict();
+        $this->PutXObjectDict();
         $this->Out('>>');
     }
 
-    function _putresources()
+    /**
+     *
+     */
+    function PutResources()
     {
         $this->PutFonts();
-        $this->_putimages();
+        $this->PutImages();
         // Resource dictionary
         $this->arr_offsets[2] = strlen($this->str_buffer);
         $this->Out('2 0 obj');
         $this->Out('<<');
-        $this->_putresourcedict();
+        $this->PutResourceDict();
         $this->Out('>>');
         $this->Out('endobj');
     }
 
-    function _putinfo()
+    /**
+     *
+     */
+    function PutInfo()
     {
         $this->Out('/Producer ' . $this->TextString('tFPDF ' . $this->str_pdf_version));
         if (!empty($this->str_title)) {
@@ -2746,7 +2874,10 @@ class PDF
         $this->Out('/CreationDate ' . $this->TextString('D:' . @date('YmdHis')));
     }
 
-    function _putcatalog()
+    /**
+     *
+     */
+    function PutCatalog()
     {
         $this->Out('/Type /Catalog');
         $this->Out('/Pages 1 0 R');
@@ -2768,37 +2899,46 @@ class PDF
         }
     }
 
-    function _putheader()
+    /**
+     *
+     */
+    function PutHeader()
     {
         $this->Out('%PDF-' . $this->str_pdf_version);
     }
 
-    function _puttrailer()
+    /**
+     *
+     */
+    function PutTrailer()
     {
         $this->Out('/Size ' . ($this->int_current_object + 1));
         $this->Out('/Root ' . $this->int_current_object . ' 0 R');
         $this->Out('/Info ' . ($this->int_current_object - 1) . ' 0 R');
     }
 
-    function _enddoc()
+    /**
+     *
+     */
+    function EndDoc()
     {
-        $this->_putheader();
+        $this->PutHeader();
         $this->PutPages();
-        $this->_putresources();
+        $this->PutResources();
         // Info
         $this->NewObject();
         $this->Out('<<');
-        $this->_putinfo();
+        $this->PutInfo();
         $this->Out('>>');
         $this->Out('endobj');
         // Catalog
         $this->NewObject();
         $this->Out('<<');
-        $this->_putcatalog();
+        $this->PutCatalog();
         $this->Out('>>');
         $this->Out('endobj');
         // Cross-ref
-        $o = strlen($this->str_buffer);
+        $int_buffer_size = strlen($this->str_buffer);
         $this->Out('xref');
         $this->Out('0 ' . ($this->int_current_object + 1));
         $this->Out('0000000000 65535 f ');
@@ -2808,57 +2948,65 @@ class PDF
         // Trailer
         $this->Out('trailer');
         $this->Out('<<');
-        $this->_puttrailer();
+        $this->PutTrailer();
         $this->Out('>>');
         $this->Out('startxref');
-        $this->Out($o);
+        $this->Out($int_buffer_size);
         $this->Out('%%EOF');
         $this->int_state = self::DOCUMENT_STATE_TERMINATED;
     }
 
-// ********* NEW FUNCTIONS *********
-// Converts UTF-8 strings to UTF16-BE.
-    function UTF8ToUTF16BE($str, $setbom = true)
+    /**
+     * Converts UTF-8 strings to UTF16-BE
+     *
+     * @param $str_input
+     * @param bool $bol_set_byte_order_mark
+     * @return string
+     */
+    function UTF8ToUTF16BE($str_input, $bol_set_byte_order_mark = true)
     {
-        $outstr = "";
-        if ($setbom) {
-            $outstr .= "\xFE\xFF"; // Byte Order Mark (BOM)
+        $str_output = "";
+        if ($bol_set_byte_order_mark) {
+            $str_output .= "\xFE\xFF";
         }
-        $outstr .= mb_convert_encoding($str, 'UTF-16BE', 'UTF-8');
-        return $outstr;
+        $str_output .= mb_convert_encoding($str_input, 'UTF-16BE', 'UTF-8');
+        return $str_output;
     }
 
-// Converts UTF-8 strings to codepoints array
-    function UTF8StringToArray($str)
+    /**
+     * Converts UTF-8 strings to codepoints array
+     *
+     * @param $str_input
+     * @return array
+     */
+    function UTF8StringToArray($str_input)
     {
-        $out = array();
-        $len = strlen($str);
-        for ($i = 0; $i < $len; $i++) {
+        $arr_output = array();
+        $int_string_length = strlen($str_input);
+        for ($i = 0; $i < $int_string_length; $i++) {
             $uni = -1;
-            $h = ord($str[$i]);
-            if ($h <= 0x7F) {
-                $uni = $h;
-            } elseif ($h >= 0xC2) {
-                if (($h <= 0xDF) && ($i < $len - 1)) {
-                    $uni = ($h & 0x1F) << 6 | (ord($str[++$i]) & 0x3F);
-                } elseif (($h <= 0xEF) && ($i < $len - 2)) {
-                    $uni = ($h & 0x0F) << 12 | (ord($str[++$i]) & 0x3F) << 6
-                        | (ord($str[++$i]) & 0x3F);
-                } elseif (($h <= 0xF4) && ($i < $len - 3)) {
-                    $uni = ($h & 0x0F) << 18 | (ord($str[++$i]) & 0x3F) << 12
-                        | (ord($str[++$i]) & 0x3F) << 6
-                        | (ord($str[++$i]) & 0x3F);
+            $int_char = ord($str_input[$i]);
+            if ($int_char <= 0x7F) {
+                $uni = $int_char;
+            } elseif ($int_char >= 0xC2) {
+                if (($int_char <= 0xDF) && ($i < $int_string_length - 1)) {
+                    $uni = ($int_char & 0x1F) << 6 | (ord($str_input[++$i]) & 0x3F);
+                } elseif (($int_char <= 0xEF) && ($i < $int_string_length - 2)) {
+                    $uni = ($int_char & 0x0F) << 12 | (ord($str_input[++$i]) & 0x3F) << 6
+                        | (ord($str_input[++$i]) & 0x3F);
+                } elseif (($int_char <= 0xF4) && ($i < $int_string_length - 3)) {
+                    $uni = ($int_char & 0x0F) << 18 | (ord($str_input[++$i]) & 0x3F) << 12
+                        | (ord($str_input[++$i]) & 0x3F) << 6
+                        | (ord($str_input[++$i]) & 0x3F);
                 }
             }
             if ($uni >= 0) {
-                $out[] = $uni;
+                $arr_output[] = $uni;
             }
         }
-        return $out;
+        return $arr_output;
     }
 
-
-// End of class
 }
 
 // Handle special IE contype request
