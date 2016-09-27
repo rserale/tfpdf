@@ -2,6 +2,10 @@
 
 namespace tFPDF;
 
+/**
+ * Class PDF
+ * @package tFPDF
+ */
 class PDF
 {
 
@@ -95,7 +99,13 @@ class PDF
      *
      * @var array
      */
-    protected $arr_standard_page_sizes = [];
+    protected $arr_standard_page_sizes = [
+        'a3' => array(841.89, 1190.55),
+        'a4' => array(595.28, 841.89),
+        'a5' => array(420.94, 595.28),
+        'letter' => array(612, 792),
+        'legal' => array(612, 1008)
+    ];
 
     /**
      * Default page size
@@ -193,14 +203,27 @@ class PDF
      *
      * @var string
      */
-    protected $str_font_path = '';
+    protected $str_font_path = __DIR__ . '/../font/';
+
+    /**
+     * The path that we use to write the fonts to
+     *
+     * @var string
+     */
+    protected $str_font_write_path;
 
     /**
      * Array of core font names
      *
      * @var array
      */
-    protected $arr_core_fonts = [];
+    protected $arr_core_fonts = [
+        'courier',
+        'helvetica',
+        'times',
+        'symbol',
+        'zapfdingbats'
+    ];
 
     /**
      * Array of used fonts
@@ -421,9 +444,6 @@ class PDF
     public function __construct($str_orientation = 'P', $str_units = 'mm', $str_size = 'A4')
     {
 
-        // Font path
-        $this->str_font_path = __DIR__ . '/../font/';
-
         if (defined('FPDF_FONTPATH')) {
             $this->str_font_path = FPDF_FONTPATH;
         }
@@ -432,8 +452,16 @@ class PDF
             $this->str_font_path = getenv('FPDF_FONTPATH');
         }
 
-        // Core fonts
-        $this->arr_core_fonts = array('courier', 'helvetica', 'times', 'symbol', 'zapfdingbats');
+        if (defined('FPDF_FONT_WRITE_PATH')) {
+            $this->str_font_write_path = FPDF_FONT_WRITE_PATH;
+            if (!is_dir($this->str_font_write_path . "/unifont")) {
+                if (!mkdir($this->str_font_write_path . "/unifont")) {
+                    $this->Error("Unable to create unifont directory in path {$this->str_font_write_path} to font write path");
+                }
+            }
+        } else {
+            $this->str_font_write_path = $this->str_font_path;
+        }
 
         // Scale factor
         switch ($str_units) {
@@ -451,14 +479,6 @@ class PDF
                 throw new \RuntimeException('Invalid unit specified: ' . $str_units);
         }
 
-        // Page sizes
-        $this->arr_standard_page_sizes = array(
-            'a3' => array(841.89, 1190.55),
-            'a4' => array(595.28, 841.89),
-            'a5' => array(420.94, 595.28),
-            'letter' => array(612, 792),
-            'legal' => array(612, 1008)
-        );
         $str_size = $this->getPageSize($str_size);
         $this->arr_default_page_sizes = $str_size;
         $this->arr_current_page_sizes = $str_size;
@@ -982,7 +1002,8 @@ class PDF
             } else {
                 $str_ttf_filename = $this->getFontPath() . 'unifont/' . $str_file;
             }
-            $str_unicode_filename = $this->getFontPath() . 'unifont/' . strtolower(substr($str_file, 0, (strpos($str_file, '.'))));
+            $str_unicode_file = 'unifont/' . strtolower(substr($str_file, 0, (strpos($str_file, '.'))));
+            $str_unicode_filename = $this->getFontWritePath() . $str_unicode_file;
             $str_name = '';
             $int_original_size = 0;
             $arr_ttf_stat = stat($str_ttf_filename);
@@ -1027,7 +1048,7 @@ class PDF
                 $str_metrics_data .= '$originalsize=' . $int_original_size . ";\n";
                 $str_metrics_data .= '$fontkey=\'' . $str_font_key . "';\n";
                 $str_metrics_data .= "?>";
-                if (is_writable(dirname($this->getFontPath() . 'unifont/' . 'x'))) {
+                if (is_writable(dirname($this->getFontWritePath() . 'unifont/' . 'x'))) {
                     $ptr_file = fopen($str_unicode_filename . '.mtx.php', "w");
                     fwrite($ptr_file, $str_metrics_data, strlen($str_metrics_data));
                     fclose($ptr_file);
@@ -1825,6 +1846,14 @@ class PDF
     }
 
     /**
+     * @return string
+     */
+    protected function getFontWritePath()
+    {
+        return $this->str_font_write_path;
+    }
+
+    /**
      *
      */
     protected function checkOutput()
@@ -2615,17 +2644,20 @@ class PDF
      */
     private function PutTTFontWidths(&$arr_font_data, $maxUni)
     {
-        if (file_exists($arr_font_data['unifilename'] . '.cw127.php')) {
-            include($arr_font_data['unifilename'] . '.cw127.php');
+
+        $int_range_id = 0;
+        $arr_range = array();
+        $int_previous_character_id = -2;
+        $int_previous_width = -1;
+        $bol_interval = false;
+        $int_start_character_id = 1;
+
+        $str_font_file = $arr_font_data['unifilename'] . '.cw127.php';
+        if (file_exists($str_font_file)) {
+            include($str_font_file);
             $int_start_character_id = 128;
-        } else {
-            $int_range_id = 0;
-            $arr_range = array();
-            $int_previous_character_id = -2;
-            $int_previous_width = -1;
-            $bol_interval = false;
-            $int_start_character_id = 1;
         }
+
         $int_character_width = $maxUni + 1;
 
         // for each character
