@@ -1044,7 +1044,7 @@ class PDF
                 $str_metrics_data .= '$desc=' . var_export($arr_descriptors, true) . ";\n";
                 $str_metrics_data .= '$up=' . $flt_underline_pos . ";\n";
                 $str_metrics_data .= '$ut=' . $flt_underline_thickness . ";\n";
-                $str_metrics_data .= '$ttffile=\'' . $str_ttf_filename . "';\n";
+                $str_metrics_data .= '$ttffile=\'' . str_replace(__DIR__ . "/", "", $str_ttf_filename) . "';\n";
                 $str_metrics_data .= '$originalsize=' . $int_original_size . ";\n";
                 $str_metrics_data .= '$fontkey=\'' . $str_font_key . "';\n";
                 $str_metrics_data .= "?>";
