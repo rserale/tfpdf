@@ -436,6 +436,13 @@ class PDF
     protected $str_pdf_version = '1.3';
 
     /**
+     * The unifont directory
+     *
+     * @var string
+     */
+    protected $str_unifont_path = 'unifont/';
+
+    /**
      * PDF constructor.
      * @param string $str_orientation
      * @param string $str_units
@@ -454,11 +461,7 @@ class PDF
 
         if (defined('FPDF_FONT_WRITE_PATH')) {
             $this->str_font_write_path = FPDF_FONT_WRITE_PATH;
-            if (!is_dir($this->str_font_write_path . "/unifont")) {
-                if (!mkdir($this->str_font_write_path . "/unifont")) {
-                    $this->Error("Unable to create unifont directory in path {$this->str_font_write_path} to font write path");
-                }
-            }
+            $this->configureFontWritePath($this->str_unifont_path);
         } else {
             $this->str_font_write_path = $this->str_font_path;
         }
@@ -1000,9 +1003,9 @@ class PDF
             if (defined("_SYSTEM_TTFONTS") && file_exists(_SYSTEM_TTFONTS . $str_file)) {
                 $str_ttf_filename = _SYSTEM_TTFONTS . $str_file;
             } else {
-                $str_ttf_filename = $this->getFontPath() . 'unifont/' . $str_file;
+                $str_ttf_filename = $this->getFontPath() . $this->str_unifont_path . $str_file;
             }
-            $str_unicode_file = 'unifont/' . strtolower(substr($str_file, 0, (strpos($str_file, '.'))));
+            $str_unicode_file = $this->str_unifont_path . strtolower(substr($str_file, 0, (strpos($str_file, '.'))));
             $str_unicode_filename = $this->getFontWritePath() . $str_unicode_file;
             $str_name = '';
             $int_original_size = 0;
@@ -1048,18 +1051,14 @@ class PDF
                 $str_metrics_data .= '$originalsize=' . $int_original_size . ";\n";
                 $str_metrics_data .= '$fontkey=\'' . $str_font_key . "';\n";
                 $str_metrics_data .= "?>";
-                if (is_writable(dirname($this->getFontWritePath() . 'unifont/' . 'x'))) {
-                    $ptr_file = fopen($str_unicode_filename . '.mtx.php', "w");
-                    fwrite($ptr_file, $str_metrics_data, strlen($str_metrics_data));
-                    fclose($ptr_file);
-                    $ptr_file = fopen($str_unicode_filename . '.cw.dat', "wb");
-                    fwrite($ptr_file, $arr_character_widths, strlen($arr_character_widths));
-                    fclose($ptr_file);
-                    @unlink($str_unicode_filename . '.cw127.php');
+                if (is_writable(dirname($this->getFontWritePath() . $this->str_unifont_path . 'x'))) {
+                    $this->writeFontFile($str_unicode_filename . '.mtx.php', $str_metrics_data);
+                    $this->writeFontFile($str_unicode_filename . '.cw.dat', $arr_character_widths);
+                    $this->clearFontFile($str_unicode_filename . '.cw127.php');
                 }
                 unset($obj_ttf);
             } else {
-                $arr_character_widths = @file_get_contents($str_unicode_filename . '.cw.dat');
+                $arr_character_widths = $this->readFontFile($str_unicode_filename . '.cw.dat');
             }
             $int_font_count = count($this->arr_fonts) + 1;
             if (!empty($this->str_alias_number_pages)) {
@@ -2416,7 +2415,8 @@ class PDF
                 // Font file embedding
                 $this->NewObject();
                 $this->arr_font_files[$str_file]['n'] = $this->int_current_object;
-                $str_font = '';
+                $str_font = $this->readFontFile($this->getFontPath() . $str_file);
+                /*
                 $ptr_file = fopen($this->getFontPath() . $str_file, 'rb', 1);
                 if (!$ptr_file) {
                     $this->Error('Font file not found');
@@ -2425,6 +2425,7 @@ class PDF
                     $str_font .= fread($ptr_file, 8192);
                 }
                 fclose($ptr_file);
+                */
                 $bol_compressed_file = (substr($str_file, -2) == '.z');
                 if (!$bol_compressed_file && isset($arr_info['length2'])) {
                     $bol_header = (ord($str_font[0]) == 128);
@@ -2663,8 +2664,8 @@ class PDF
         // for each character
         for ($int_character_id = $int_start_character_id; $int_character_id < $int_character_width; $int_character_id++) {
             if ($int_character_id == 128 && (!file_exists($arr_font_data['unifilename'] . '.cw127.php'))) {
-                if (is_writable(dirname($this->getFontPath() . 'unifont/x'))) {
-                    $ptr_file = fopen($arr_font_data['unifilename'] . '.cw127.php', "wb");
+                if (is_writable(dirname($this->getFontPath() . $this->str_unifont_path /*'unifont/x'*/))) {
+
                     $str_data = '<?php' . "\n";
                     $str_data .= '$rangeid=' . $int_range_id . ";\n";
                     $str_data .= '$prevcid=' . $int_previous_character_id . ";\n";
@@ -2676,8 +2677,7 @@ class PDF
                     }
                     $str_data .= '$range=' . var_export($arr_range, true) . ";\n";
                     $str_data .= "?>";
-                    fwrite($ptr_file, $str_data, strlen($str_data));
-                    fclose($ptr_file);
+                    $this->writeFontFile($arr_font_data['unifilename'] . '.cw127.php', $str_data);
                 }
             }
             if ($arr_font_data['cw'][$int_character_id * 2] == "\00" && $arr_font_data['cw'][$int_character_id * 2 + 1] == "\00") {
@@ -3039,10 +3039,48 @@ class PDF
         return $arr_output;
     }
 
-}
+    /**
+     * @param $str_name
+     * @param $str_data
+     * @return int
+     */
+    public function writeFontFile($str_name, $str_data)
+    {
+        return file_put_contents($str_name, $str_data);
+    }
 
-// Handle special IE contype request
-if (isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] == 'contype') {
-    header('Content-Type: application/pdf');
-    exit;
+    /**
+     * @param $str_name
+     * @return string
+     */
+    public function readFontFile($str_name)
+    {
+        return file_get_contents($str_name);
+    }
+
+    /**
+     * @param $str_name
+     * @return bool
+     */
+    public function clearFontFile($str_name)
+    {
+        if (file_exists($str_name)) {
+            unlink($str_name);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $str_path
+     */
+    public function configureFontWritePath($str_path)
+    {
+        if (!is_dir($this->str_font_write_path . $str_path)) {
+            if (!mkdir($this->str_font_write_path . $str_path)) {
+                $this->Error("Unable to create unifont directory in path {$this->str_font_write_path}");
+            }
+        }
+    }
+
 }
