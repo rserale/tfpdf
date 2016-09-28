@@ -13,7 +13,7 @@ $desc=array (
 );
 $up=-63;
 $ut=44;
-$ttffile='/sprinttool/3.1.x/Client/repos/tfpdf/src/tFPDF/../font/unifont/DejaVuSerif-Bold.ttf';
+$ttffile='../font/unifont/DejaVuSerif-Bold.ttf';
 $originalsize=341072;
 $fontkey='dejavuserifB';
 ?>

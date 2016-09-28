@@ -13,7 +13,7 @@ $desc=array (
 );
 $up=-72;
 $ut=49;
-$ttffile='/sprinttool/3.1.x/Client/repos/tfpdf/src/tFPDF/../font/unifont/BabelStoneHan-Bold.ttf';
+$ttffile='../font/unifont/BabelStoneHan-Bold.ttf';
 $originalsize=25281048;
 $fontkey='babelstonehanB';
 ?>

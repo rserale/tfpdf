@@ -13,7 +13,7 @@ $desc=array (
 );
 $up=-63;
 $ut=44;
-$ttffile='/sprinttool/3.1.x/Client/repos/tfpdf/src/tFPDF/../font/unifont/DejaVuSans-Oblique.ttf';
+$ttffile='../font/unifont/DejaVuSans-Oblique.ttf';
 $originalsize=611556;
 $fontkey='dejavusansI';
 ?>
