@@ -9,6 +9,4 @@ vendor
 composer.lock
 tests/test_data/output.pdf
 
-*.mtx.php
-*.cw.dat
 *.cw127.php
