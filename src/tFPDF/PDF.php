@@ -461,10 +461,13 @@ class PDF
 
         if (defined('FPDF_FONT_WRITE_PATH')) {
             $this->str_font_write_path = FPDF_FONT_WRITE_PATH;
-            $this->configureFontWritePath($this->str_unifont_path);
+        } else if (getenv('FPDF_FONT_WRITE_PATH')) {
+            $this->str_font_write_path = getenv('FPDF_FONT_WRITE_PATH');
         } else {
             $this->str_font_write_path = $this->str_font_path;
         }
+
+        $this->configureFontWritePath($this->str_unifont_path);
 
         // Scale factor
         switch ($str_units) {
