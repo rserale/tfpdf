@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 define('FPDF_FONT_WRITE_PATH', '/home/dwilcock/');
 
-class tFPDFTest extends TestCase
+class PDFGeneratedTest extends TestCase
 {
    public function testFileIsGenerated()
    {
