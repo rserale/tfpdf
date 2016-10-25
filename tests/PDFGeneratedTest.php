@@ -2,9 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 
-define('FPDF_FONT_WRITE_PATH', '/home/dwilcock/');
+define('FPDF_FONT_WRITE_PATH', __DIR__ . '/../build/');
 
-class tFPDFTest extends TestCase
+class PDFGeneratedTest extends TestCase
 {
    public function testFileIsGenerated()
    {
