@@ -1010,12 +1010,14 @@ class PDF
                 $str_ttf_filename = $this->getFontPath() . $this->str_unifont_path . $str_file;
             }
             $str_unicode_file = $this->str_unifont_path . strtolower(substr($str_file, 0, (strpos($str_file, '.'))));
-            $str_unicode_filename = $this->getFontWritePath() . $str_unicode_file;
+            $str_unicode_filename = $this->getFontPath() . $str_unicode_file;
             $str_name = '';
             $int_original_size = 0;
             $arr_ttf_stat = stat($str_ttf_filename);
             if (file_exists($str_unicode_filename . '.mtx.php')) {
                 include($str_unicode_filename . '.mtx.php');
+            } else {
+                $str_unicode_filename = $this->getFontWritePath() . $str_unicode_file;
             }
 
             $arr_descriptors = [];
