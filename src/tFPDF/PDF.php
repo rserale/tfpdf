@@ -443,6 +443,21 @@ class PDF
     protected $str_unifont_path = 'unifont/';
 
     /**
+     * @var string
+     */
+    protected $str_font_metrics_file_suffix = '-font-metrics.json';
+
+    /**
+     * @var string
+     */
+    protected $str_character_widths_file_suffix = '-character-widths.dat';
+
+    /**
+     * @var string
+     */
+    protected $str_127_character_widths_file_suffix = '-character-width-127.php';
+
+    /**
      * PDF constructor.
      * @param string $str_orientation
      * @param string $str_units
@@ -1001,8 +1016,6 @@ class PDF
         if (isset($this->arr_fonts[$str_font_key])) {
             return;
         }
-
-
         if ($bol_unicode) {
             if (defined("_SYSTEM_TTFONTS") && file_exists(_SYSTEM_TTFONTS . $str_file)) {
                 $str_ttf_filename = _SYSTEM_TTFONTS . $str_file;
@@ -1010,27 +1023,21 @@ class PDF
                 $str_ttf_filename = $this->getFontPath() . $this->str_unifont_path . $str_file;
             }
             $str_unicode_file = $this->str_unifont_path . strtolower(substr($str_file, 0, (strpos($str_file, '.'))));
-            $str_unicode_filename = $this->getFontWritePath() . $str_unicode_file;
+            $str_unicode_filename = $this->getFontPath() . $str_unicode_file;
             $str_name = '';
             $int_original_size = 0;
             $arr_ttf_stat = stat($str_ttf_filename);
-            if (file_exists($str_unicode_filename . '.mtx.php')) {
-                include($str_unicode_filename . '.mtx.php');
-            } else {
-                //$str_unicode_filename = $this->getFontWritePath() . $str_unicode_file;
+            if (file_exists($str_unicode_filename . $this->str_font_metrics_file_suffix)) {
+                include($str_unicode_filename . $this->str_font_metrics_file_suffix);
             }
-
             $arr_descriptors = [];
             $flt_underline_pos = 0.00;
             $flt_underline_thickness = 0.00;
-
             if (!isset($str_type) || !isset($str_name) || $int_original_size != $arr_ttf_stat['size']) {
-
                 $obj_ttf = new TTFontFile();
                 $obj_ttf->getMetrics($str_ttf_filename);
                 $arr_character_widths = $obj_ttf->getCharWidths();
                 $str_name = preg_replace('/[ ()]/', '', $obj_ttf->getFullName());
-
                 $arr_descriptors = array(
                     'Ascent' => round($obj_ttf->getAscent()),
                     'Descent' => round($obj_ttf->getDescent()),
@@ -1041,7 +1048,6 @@ class PDF
                     'StemV' => round($obj_ttf->getStemV()),
                     'MissingWidth' => round($obj_ttf->getDefaultWidth())
                 );
-
                 $flt_underline_pos = round($obj_ttf->getUnderlinePosition());
                 $flt_underline_thickness = round($obj_ttf->getUnderlineThickness());
                 $int_original_size = $arr_ttf_stat['size'] + 0;
@@ -1057,14 +1063,14 @@ class PDF
                 $str_metrics_data .= '$originalsize=' . $int_original_size . ";\n";
                 $str_metrics_data .= '$fontkey=\'' . $str_font_key . "';\n";
                 $str_metrics_data .= "?>";
-                if (is_writable(dirname($this->getFontWritePath() . $this->str_unifont_path . 'x'))) {
-                    $this->writeFontFile($str_unicode_filename . '.mtx.php', $str_metrics_data);
-                    $this->writeFontFile($str_unicode_filename . '.cw.dat', $arr_character_widths);
-                    $this->clearFontFile($str_unicode_filename . '.cw127.php');
+                if (is_writable(dirname($this->getFontPath() . $this->str_unifont_path))) {
+                    $this->writeFontFile($str_unicode_filename .  $this->str_font_metrics_file_suffix, $str_metrics_data);
+                    $this->writeFontFile($str_unicode_filename . $this->str_character_widths_file_suffix, $arr_character_widths);
+                    $this->clearFontFile($str_unicode_filename . $this->str_127_character_widths_file_suffix);
                 }
                 unset($obj_ttf);
             } else {
-                $arr_character_widths = $this->readFontFile($str_unicode_filename . '.cw.dat');
+                $arr_character_widths = $this->readFontFile($str_unicode_filename . $this->str_character_widths_file_suffix);
             }
             $int_font_count = count($this->arr_fonts) + 1;
             if (!empty($this->str_alias_number_pages)) {
@@ -1085,7 +1091,6 @@ class PDF
                 'subset' => $arr_numbers,
                 'unifilename' => $str_unicode_filename
             );
-
             $this->arr_font_files[$str_font_key] = array('length1' => $int_original_size, 'type' => self::FONT_TRUETYPE, 'ttffile' => $str_ttf_filename);
             $this->arr_font_files[$str_file] = array('type' => self::FONT_TRUETYPE);
             unset($arr_character_widths);
@@ -2549,8 +2554,8 @@ class PDF
                     $this->Out('/BaseFont /' . $str_font_name . '');
                     $this->Out('/CIDSystemInfo ' . ($this->int_current_object + 2) . ' 0 R');
                     $this->Out('/FontDescriptor ' . ($this->int_current_object + 3) . ' 0 R');
-                    if (isset($arr_font_data['desc']['MissingWidth'])) {
-                        $this->Out('/DW ' . $arr_font_data['desc']['MissingWidth'] . '');
+                    if (isset($arr_font_data['desc']->MissingWidth)) {
+                        $this->Out('/DW ' . $arr_font_data['desc']->MissingWidth . '');
                     }
 
                     $this->PutTTFontWidths($arr_font_data, $obj_ttf->getMaxUni());
@@ -2645,122 +2650,116 @@ class PDF
         }
     }
 
-    /**
-     * @param $arr_font_data
-     * @param $maxUni
-     */
-    private function PutTTFontWidths(&$arr_font_data, $maxUni)
+    function PutTTFontWidths(&$font, $maxUni)
     {
-
-        $int_range_id = 0;
-        $arr_range = array();
-        $int_previous_character_id = -2;
-        $int_previous_width = -1;
-        $bol_interval = false;
-        $int_start_character_id = 1;
-
-        $str_font_file = $arr_font_data['unifilename'] . '.cw127.php';
+        $str_font_file = $font['unifilename'] . $this->str_127_character_widths_file_suffix;
         if (file_exists($str_font_file)) {
             include($str_font_file);
-            $int_start_character_id = 128;
+            $startcid = 128;
+        } else {
+            $rangeid = 0;
+            $range = array();
+            $prevcid = -2;
+            $prevwidth = -1;
+            $interval = false;
+            $startcid = 1;
         }
-
-        $int_character_width = $maxUni + 1;
-
+        $cwlen = $maxUni + 1;
         // for each character
-        for ($int_character_id = $int_start_character_id; $int_character_id < $int_character_width; $int_character_id++) {
-            if ($int_character_id == 128 && (!file_exists($arr_font_data['unifilename'] . '.cw127.php'))) {
-                if (is_writable(dirname($this->getFontPath() . $this->str_unifont_path /*'unifont/x'*/))) {
-
-                    $str_data = '<?php' . "\n";
-                    $str_data .= '$rangeid=' . $int_range_id . ";\n";
-                    $str_data .= '$prevcid=' . $int_previous_character_id . ";\n";
-                    $str_data .= '$prevwidth=' . $int_previous_width . ";\n";
-                    if ($bol_interval) {
-                        $str_data .= '$interval=true' . ";\n";
+        for ($cid = $startcid; $cid < $cwlen; $cid++) {
+            if ($cid == 128 && (!file_exists($str_font_file))) {
+                if (is_writable(dirname($this->getFontPath() . $this->str_unifont_path))) {
+                    $fh = fopen($str_font_file, "wb");
+                    $cw127 = '<?php' . "\n";
+                    $cw127 .= '$rangeid=' . $rangeid . ";\n";
+                    $cw127 .= '$prevcid=' . $prevcid . ";\n";
+                    $cw127 .= '$prevwidth=' . $prevwidth . ";\n";
+                    if ($interval) {
+                        $cw127 .= '$interval=true' . ";\n";
                     } else {
-                        $str_data .= '$interval=false' . ";\n";
+                        $cw127 .= '$interval=false' . ";\n";
                     }
-                    $str_data .= '$range=' . var_export($arr_range, true) . ";\n";
-                    $str_data .= "?>";
-                    $this->writeFontFile($arr_font_data['unifilename'] . '.cw127.php', $str_data);
+                    $cw127 .= '$range=' . var_export($range, true) . ";\n";
+                    $cw127 .= "?>";
+                    fwrite($fh, $cw127, strlen($cw127));
+                    fclose($fh);
                 }
             }
-            if ($arr_font_data['cw'][$int_character_id * 2] == "\00" && $arr_font_data['cw'][$int_character_id * 2 + 1] == "\00") {
+            if ($font['cw'][$cid * 2] == "\00" && $font['cw'][$cid * 2 + 1] == "\00") {
                 continue;
             }
-            $int_width = (ord($arr_font_data['cw'][$int_character_id * 2]) << 8) + ord($arr_font_data['cw'][$int_character_id * 2 + 1]);
-            if ($int_width == 65535) {
-                $int_width = 0;
+            $width = (ord($font['cw'][$cid * 2]) << 8) + ord($font['cw'][$cid * 2 + 1]);
+            if ($width == 65535) {
+                $width = 0;
             }
-            if ($int_character_id > 255 && (!isset($arr_font_data['subset'][$int_character_id]) || !$arr_font_data['subset'][$int_character_id])) {
+            if ($cid > 255 && (!isset($font['subset'][$cid]) || !$font['subset'][$cid])) {
                 continue;
             }
-            if (!isset($arr_font_data['dw']) || (isset($arr_font_data['dw']) && $int_width != $arr_font_data['dw'])) {
-                if ($int_character_id == ($int_previous_character_id + 1)) {
-                    if ($int_width == $int_previous_width) {
-                        if ($int_width == $arr_range[$int_range_id][0]) {
-                            $arr_range[$int_range_id][] = $int_width;
+            if (!isset($font['dw']) || (isset($font['dw']) && $width != $font['dw'])) {
+                if ($cid == ($prevcid + 1)) {
+                    if ($width == $prevwidth) {
+                        if ($width == $range[$rangeid][0]) {
+                            $range[$rangeid][] = $width;
                         } else {
-                            array_pop($arr_range[$int_range_id]);
+                            array_pop($range[$rangeid]);
                             // new range
-                            $int_range_id = $int_previous_character_id;
-                            $arr_range[$int_range_id] = array();
-                            $arr_range[$int_range_id][] = $int_previous_width;
-                            $arr_range[$int_range_id][] = $int_width;
+                            $rangeid = $prevcid;
+                            $range[$rangeid] = array();
+                            $range[$rangeid][] = $prevwidth;
+                            $range[$rangeid][] = $width;
                         }
-                        $bol_interval = true;
-                        $arr_range[$int_range_id]['interval'] = true;
+                        $interval = true;
+                        $range[$rangeid]['interval'] = true;
                     } else {
-                        if ($bol_interval) {
+                        if ($interval) {
                             // new range
-                            $int_range_id = $int_character_id;
-                            $arr_range[$int_range_id] = array();
-                            $arr_range[$int_range_id][] = $int_width;
+                            $rangeid = $cid;
+                            $range[$rangeid] = array();
+                            $range[$rangeid][] = $width;
                         } else {
-                            $arr_range[$int_range_id][] = $int_width;
+                            $range[$rangeid][] = $width;
                         }
-                        $bol_interval = false;
+                        $interval = false;
                     }
                 } else {
-                    $int_range_id = $int_character_id;
-                    $arr_range[$int_range_id] = array();
-                    $arr_range[$int_range_id][] = $int_width;
-                    $bol_interval = false;
+                    $rangeid = $cid;
+                    $range[$rangeid] = array();
+                    $range[$rangeid][] = $width;
+                    $interval = false;
                 }
-                $int_previous_character_id = $int_character_id;
-                $int_previous_width = $int_width;
+                $prevcid = $cid;
+                $prevwidth = $width;
             }
         }
-        $int_previous_key = -1;
-        $int_next_key = -1;
-        $bol_previous_interval = false;
-        foreach ($arr_range as $k => $ws) {
+        $prevk = -1;
+        $nextk = -1;
+        $prevint = false;
+        foreach ($range as $k => $ws) {
             $cws = count($ws);
-            if (($k == $int_next_key) AND (!$bol_previous_interval) AND ((!isset($ws['interval'])) OR ($cws < 4))) {
-                if (isset($arr_range[$k]['interval'])) {
-                    unset($arr_range[$k]['interval']);
+            if (($k == $nextk) AND (!$prevint) AND ((!isset($ws['interval'])) OR ($cws < 4))) {
+                if (isset($range[$k]['interval'])) {
+                    unset($range[$k]['interval']);
                 }
-                $arr_range[$int_previous_key] = array_merge($arr_range[$int_previous_key], $arr_range[$k]);
-                unset($arr_range[$k]);
+                $range[$prevk] = array_merge($range[$prevk], $range[$k]);
+                unset($range[$k]);
             } else {
-                $int_previous_key = $k;
+                $prevk = $k;
             }
-            $int_next_key = $k + $cws;
+            $nextk = $k + $cws;
             if (isset($ws['interval'])) {
                 if ($cws > 3) {
-                    $bol_previous_interval = true;
+                    $prevint = true;
                 } else {
-                    $bol_previous_interval = false;
+                    $prevint = false;
                 }
-                unset($arr_range[$k]['interval']);
-                --$int_next_key;
+                unset($range[$k]['interval']);
+                --$nextk;
             } else {
-                $bol_previous_interval = false;
+                $prevint = false;
             }
         }
         $w = '';
-        foreach ($arr_range as $k => $ws) {
+        foreach ($range as $k => $ws) {
             if (count(array_count_values($ws)) == 1) {
                 $w .= ' ' . $k . ' ' . ($k + count($ws) - 1) . ' ' . $ws[0];
             } else {
