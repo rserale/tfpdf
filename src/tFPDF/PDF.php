@@ -1431,8 +1431,10 @@ class PDF
      * @param int $int_border
      * @param string $str_alignment
      * @param bool $bol_fill
+     *
+     * @return string
      */
-    public function MultiCell($flt_width, $flt_height, $str_text, $int_border = 0, $str_alignment = 'J', $bol_fill = false)
+    public function MultiCell($flt_width, $flt_height, $str_text, $int_border = 0, $str_alignment = 'J', $bol_fill = false, $maxline = 0)
     {
         // Output text with automatic or explicit line breaks
         $arr_character_width = &$this->arr_current_font_info['cw'];
@@ -1504,6 +1506,9 @@ class PDF
                 if ($int_border && $int_line_count == 2) {
                     $mix_adjusted_border = $mix_adjusted_border_2;
                 }
+                if($maxline && $int_line_count > $maxline) {
+                    return substr($str_text, $int_i);
+                }
                 continue;
             }
             if ($str_character == ' ') {
@@ -1553,6 +1558,15 @@ class PDF
                 if ($int_border && $int_line_count == 2) {
                     $mix_adjusted_border = $mix_adjusted_border_2;
                 }
+
+                if($maxline && $int_line_count > $maxline) {
+                    if($this->int_word_spacing > 0) {
+                        $this->int_word_spacing = 0;
+                        $this->Out('0 Tw');
+                    }
+                    return substr($str_text, $int_i);
+                }
+
             } else {
                 $int_i++;
             }
@@ -1571,6 +1585,7 @@ class PDF
             $this->Cell($flt_width, $flt_height, substr($str_text, $int_j, $int_i - $int_j), $mix_adjusted_border, 2, $str_alignment, $bol_fill);
         }
         $this->flt_position_x = $this->int_left_margin;
+        return '';
     }
 
     /**
