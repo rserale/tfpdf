@@ -1431,6 +1431,7 @@ class PDF
      * @param int $int_border
      * @param string $str_alignment
      * @param bool $bol_fill
+     * @param int int_maxline
      *
      * @return string
      */
