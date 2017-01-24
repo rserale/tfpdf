@@ -1434,7 +1434,7 @@ class PDF
      *
      * @return string
      */
-    public function MultiCell($flt_width, $flt_height, $str_text, $int_border = 0, $str_alignment = 'J', $bol_fill = false, $maxline = 0)
+    public function MultiCell($flt_width, $flt_height, $str_text, $int_border = 0, $str_alignment = 'J', $bol_fill = false, $int_maxline = 0)
     {
         // Output text with automatic or explicit line breaks
         $arr_character_width = &$this->arr_current_font_info['cw'];
@@ -1506,7 +1506,7 @@ class PDF
                 if ($int_border && $int_line_count == 2) {
                     $mix_adjusted_border = $mix_adjusted_border_2;
                 }
-                if($maxline && $int_line_count > $maxline) {
+                if($int_maxline && $int_line_count > $int_maxline) {
                     return substr($str_text, $int_i);
                 }
                 continue;
@@ -1559,8 +1559,8 @@ class PDF
                     $mix_adjusted_border = $mix_adjusted_border_2;
                 }
 
-                if($maxline && $int_line_count > $maxline) {
-                    if($this->int_word_spacing > 0) {
+                if ($int_maxline && $int_line_count > $int_maxline) {
+                    if ($this->int_word_spacing > 0) {
                         $this->int_word_spacing = 0;
                         $this->Out('0 Tw');
                     }
