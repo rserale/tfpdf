@@ -24,7 +24,7 @@ Pour réparer ça, voici les étapes à suivre (utiliset le guichet dans le navi
 ## Notes:
 
 
-- le filtre sur le mode de livraison ne fonctionne pas lorsque le filtre par événement est sur "Tous les événements". Il faut sélectionner un événement particulier pour le voir fonctionner (c'est comme ça ¯\_(ツ)_/¯ )
+- le filtre sur le mode de livraison ne fonctionne pas lorsque le filtre par événement est sur "Tous les événements". Il faut sélectionner un événement particulier pour le voir fonctionner (c'est comme ça ¯\\_(ツ)_/¯ )
  
 - pour O70725, le guichet doit être configuré en français pour que les filtres par mode de livraison apparaissent. Pour O94151, il devra être configuré en anglais, sinon la liste des filtres par mode de livraison apparaîtra vide
 
